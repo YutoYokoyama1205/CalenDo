@@ -1,0 +1,135 @@
+:root {
+  /* --- カラーパレット --- */
+  --color-paper: #f4f1ea;
+  --color-paper-warm: #ebe6da;
+  --color-ink: #1a1d24;
+  --color-ink-soft: #2d313a;
+  --color-ink-mute: #6b6e76;
+  --color-line: #d8d3c5;
+  --color-line-soft: #e5e0d2;
+  --color-accent: #c8932e;
+  --color-accent-soft: #e8c547;
+  --color-accent-dim: #f4e7b8;
+  --color-success: #5a7d3a;
+  --color-success-soft: #c5d4a8;
+  --color-danger: #a8442a;
+  --color-today: #1a1d24;
+
+  /* --- タイポグラフィ --- */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter Tight", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+  /* --- スペーシング --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  /* --- シャドウ --- */
+  --shadow-soft: 0 1px 2px rgba(26, 29, 36, 0.05),
+    0 8px 24px -8px rgba(26, 29, 36, 0.1);
+  --shadow-pop: 0 4px 8px rgba(26, 29, 36, 0.08),
+    0 24px 48px -12px rgba(26, 29, 36, 0.18);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 紙のような微細なテクスチャ */
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(200, 147, 46, 0.04) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(26, 29, 36, 0.03) 0%,
+      transparent 40%
+    );
+  background-attachment: fixed;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+input,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* スクロールバー */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-mute);
+}
+
+/* 共通アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

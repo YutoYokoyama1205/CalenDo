@@ -1,0 +1,199 @@
+.achievement-panel {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  padding: 32px;
+  background-color: #fefdf9;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 装飾要素: 右上のセリフ装飾 */
+.achievement-panel::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-dim) 0%,
+    transparent 70%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* --- 左: サマリー --- */
+.ach-summary {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ach-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-mute);
+}
+
+.ach-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  color: var(--color-ink);
+}
+
+.ach-title em {
+  font-style: italic;
+  color: var(--color-accent);
+  font-weight: 400;
+}
+
+.ach-lead {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-ink-mute);
+  margin-bottom: 28px;
+  max-width: 280px;
+}
+
+.ach-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-line);
+}
+
+.ach-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.ach-stat dt {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--color-ink-mute);
+  letter-spacing: 0.05em;
+}
+
+.ach-stat dd {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.ach-stat-val {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+}
+
+.ach-stat-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-mute);
+}
+
+/* --- 右: チャート --- */
+.ach-chart {
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  position: relative;
+  z-index: 1;
+}
+
+.ach-chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed var(--color-line);
+}
+
+.ach-chart-axis-label,
+.ach-chart-range {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-ink-mute);
+}
+
+.ach-chart-canvas {
+  flex: 1;
+  min-height: 220px;
+}
+
+/* チャートツールチップ */
+.chart-tooltip {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  font-size: 12px;
+  min-width: 130px;
+}
+
+.chart-tooltip-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-accent-soft);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.chart-tooltip-rate {
+  font-family: var(--font-display);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.chart-tooltip-rate strong {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-accent-soft);
+}
+
+.chart-tooltip-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-ink-mute);
+}
+
+@media (max-width: 900px) {
+  .achievement-panel {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+  .ach-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .ach-stat {
+    flex: 1;
+    min-width: 100px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

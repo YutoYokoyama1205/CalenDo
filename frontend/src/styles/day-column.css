@@ -1,0 +1,239 @@
+.day-col {
+  display: flex;
+  flex-direction: column;
+  background-color: #fefdf9;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  min-height: 540px;
+  max-height: 720px;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.day-col:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.day-col.is-weekend {
+  background-color: var(--color-paper-warm);
+}
+
+/* 今日のカラム - インクで反転 */
+.day-col.is-today {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-pop);
+}
+
+.day-col.is-today .day-en,
+.day-col.is-today .day-ja {
+  color: var(--color-accent-soft);
+}
+
+/* --- ヘッダー --- */
+.day-head {
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid var(--color-line);
+  position: relative;
+}
+
+.day-col.is-today .day-head {
+  border-bottom-color: rgba(244, 241, 234, 0.15);
+}
+
+.day-head-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.day-en {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--color-ink-mute);
+}
+
+.today-pip {
+  font-size: 8px;
+  color: var(--color-accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.day-date-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.day-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.day-ja {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--color-ink-mute);
+  font-style: italic;
+}
+
+.day-stats {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.day-rate {
+  font-family: var(--font-display);
+  display: flex;
+  align-items: baseline;
+}
+
+.rate-val {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.day-col.is-today .rate-val {
+  color: var(--color-accent-soft);
+}
+
+.rate-pct {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  margin-left: 2px;
+  color: var(--color-ink-mute);
+}
+
+.day-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-mute);
+}
+
+.day-count strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.day-col.is-today .day-count strong {
+  color: var(--color-paper);
+}
+
+.count-sep {
+  margin: 0 2px;
+  opacity: 0.5;
+}
+
+.count-empty {
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* 達成率バー */
+.day-progress {
+  height: 2px;
+  background-color: var(--color-line-soft);
+  margin-top: 14px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.day-col.is-today .day-progress {
+  background-color: rgba(244, 241, 234, 0.12);
+}
+
+.day-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    var(--color-accent-soft) 100%
+  );
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 2px;
+}
+
+/* --- タスクリスト --- */
+.day-tasks {
+  flex: 1;
+  padding: 10px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.day-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-mute);
+  font-size: 14px;
+  font-family: var(--font-display);
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.empty-line {
+  display: block;
+  width: 40%;
+  height: 1px;
+  background-color: var(--color-line);
+}
+
+.day-col.is-today .empty-line {
+  background-color: rgba(244, 241, 234, 0.2);
+}
+
+/* --- 追加ボタン --- */
+.day-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border-top: 1px dashed var(--color-line);
+  color: var(--color-ink-mute);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  transition: all 0.2s ease;
+}
+
+.day-col.is-today .day-add {
+  border-top-color: rgba(244, 241, 234, 0.15);
+  color: var(--color-accent-soft);
+}
+
+.day-add:hover {
+  background-color: var(--color-accent-dim);
+  color: var(--color-ink);
+}
+
+.day-col.is-today .day-add:hover {
+  background-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.day-add-plus {
+  font-size: 14px;
+  font-weight: bold;
+}

@@ -1,0 +1,106 @@
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(244, 241, 234, 0.4);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-left: 2px solid var(--color-accent);
+  animation: fadeIn 0.3s ease;
+}
+
+.day-col.is-today .task-item {
+  background-color: rgba(244, 241, 234, 0.06);
+  border-left-color: var(--color-accent-soft);
+}
+
+.task-item:hover {
+  background-color: var(--color-paper-warm);
+  transform: translateX(2px);
+}
+
+.day-col.is-today .task-item:hover {
+  background-color: rgba(244, 241, 234, 0.12);
+}
+
+.task-item.is-done {
+  border-left-color: var(--color-success);
+  opacity: 0.55;
+}
+
+.task-item.is-done .task-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  color: var(--color-ink-mute);
+}
+
+/* チェックボックス */
+.task-check {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-ink-mute);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.15s ease;
+  background-color: transparent;
+}
+
+.task-check:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-dim);
+}
+
+.day-col.is-today .task-check {
+  border-color: var(--color-accent-soft);
+}
+
+.task-item.is-done .task-check {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-paper);
+}
+
+/* タスクボディ */
+.task-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-ink-mute);
+  letter-spacing: 0.02em;
+}
+
+.day-col.is-today .task-time {
+  color: var(--color-accent-soft);
+}
+
+.task-time-sep {
+  opacity: 0.5;
+}
+
+.task-name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+  color: var(--color-ink);
+}
+
+.day-col.is-today .task-name {
+  color: var(--color-paper);
+}
