@@ -1,0 +1,134 @@
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(214, 157, 104, 0.14), transparent 32%),
+    var(--color-bg, #f7f3ec);
+}
+
+.auth-card {
+  width: min(100%, 420px);
+  padding: 38px;
+  border: 1px solid rgba(71, 62, 51, 0.13);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 55px rgba(66, 54, 40, 0.12);
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-logo {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  color: white;
+  background: var(--color-accent, #c87945);
+  font: 700 26px Georgia, serif;
+}
+
+.auth-brand h1 {
+  margin: 0;
+  font: 600 32px Georgia, serif;
+}
+
+.auth-brand p {
+  margin: 7px 0 0;
+  color: #84796d;
+  font-size: 14px;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  margin-bottom: 24px;
+  border-radius: 10px;
+  background: #f2eee8;
+}
+
+.auth-tabs button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px;
+  color: #7c7267;
+  background: transparent;
+  cursor: pointer;
+}
+
+.auth-tabs button.active {
+  color: #3f3932;
+  background: white;
+  box-shadow: 0 2px 8px rgba(66, 54, 40, 0.08);
+}
+
+.auth-card form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-card label {
+  display: grid;
+  gap: 7px;
+  color: #514941;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-card input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d0c7;
+  border-radius: 9px;
+  padding: 12px 13px;
+  background: #fff;
+  color: #332f2a;
+  font: inherit;
+}
+
+.auth-card input:focus {
+  border-color: var(--color-accent, #c87945);
+  outline: 3px solid rgba(200, 121, 69, 0.14);
+}
+
+.auth-hint,
+.auth-error {
+  margin: -8px 0 0;
+  font-size: 12px;
+}
+
+.auth-hint {
+  color: #82786e;
+}
+
+.auth-error {
+  color: #b33b34;
+}
+
+.auth-submit {
+  border: 0;
+  border-radius: 9px;
+  padding: 13px;
+  color: white;
+  background: var(--color-accent, #c87945);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
