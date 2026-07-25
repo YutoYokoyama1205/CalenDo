@@ -5,6 +5,7 @@ import AchievementPanel from "./components/AchievementPanel.jsx";
 import TaskModal from "./components/TaskModal.jsx";
 import DatePickerModal from "./components/DatePickerModal.jsx";
 import AuthScreen from "./components/AuthScreen.jsx";
+import SettingsModal from "./components/SettingsModal.jsx";
 import {
   formatDateKey,
   getMondayOf,
@@ -34,6 +35,8 @@ export default function App() {
   // モーダル状態
   const [modalState, setModalState] = useState(null); // { date, task? }
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [appStopped, setAppStopped] = useState(false);
 
   const weekDates = getWeekDates(monday);
   const weekKeys = weekDates.map(formatDateKey);
@@ -43,6 +46,18 @@ export default function App() {
       .then((result) => setUser(result.user))
       .catch(() => setUser(null))
       .finally(() => setAuthLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const handleExpiredSession = () => {
+      setUser(null);
+      setWeekData({});
+      setSettingsOpen(false);
+      setError("ログインの有効期限が切れました。もう一度ログインしてください。");
+    };
+    window.addEventListener("calendo:auth-expired", handleExpiredSession);
+    return () =>
+      window.removeEventListener("calendo:auth-expired", handleExpiredSession);
   }, []);
 
   // --- 週データロード ---
@@ -129,8 +144,22 @@ export default function App() {
     return <div className="app-loading">CalenDoを読み込んでいます...</div>;
   }
 
+  if (appStopped) {
+    return (
+      <div className="app-stopped">
+        <h1>CalenDoを終了しました</h1>
+        <p>このタブを閉じてください。</p>
+      </div>
+    );
+  }
+
   if (!user) {
-    return <AuthScreen onAuthenticated={setUser} />;
+    return (
+      <AuthScreen
+        onAuthenticated={setUser}
+        onAppShutdown={() => setAppStopped(true)}
+      />
+    );
   }
 
   return (
@@ -143,12 +172,13 @@ export default function App() {
         onPickDate={() => setDatePickerOpen(true)}
         user={user}
         onLogout={handleLogout}
+        onSettings={() => setSettingsOpen(true)}
       />
 
       <main className="app-main">
         {error && (
           <div className="error-banner">
-            <span>⚠ バックエンド接続エラー: {error}</span>
+            <span>⚠ {error}</span>
             <button onClick={loadWeek}>再試行</button>
           </div>
         )}
@@ -202,6 +232,23 @@ export default function App() {
           onSelect={(date) => {
             jumpToDate(date);
             setDatePickerOpen(false);
+          }}
+        />
+      )}
+
+      {settingsOpen && (
+        <SettingsModal
+          user={user}
+          onClose={() => setSettingsOpen(false)}
+          onDataChanged={loadWeek}
+          onAccountDeleted={() => {
+            setSettingsOpen(false);
+            setUser(null);
+            setWeekData({});
+          }}
+          onAppShutdown={() => {
+            setSettingsOpen(false);
+            setAppStopped(true);
           }}
         />
       )}

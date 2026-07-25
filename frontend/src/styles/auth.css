@@ -127,6 +127,17 @@
   cursor: wait;
 }
 
+.auth-quit {
+  display: block;
+  margin: 18px auto 0;
+  color: #84796d;
+  font-size: 12px;
+}
+
+.auth-quit:hover {
+  color: #b33b34;
+}
+
 @media (max-width: 520px) {
   .auth-card {
     padding: 28px 22px;

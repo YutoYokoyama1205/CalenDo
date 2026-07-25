@@ -7,7 +7,7 @@ from functools import wraps
 from flask import jsonify, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from storage import APP_DIR, _write_json_atomic
+from storage import APP_DIR, _write_json_atomic, delete_tasks
 
 
 USERS_FILE = os.path.join(APP_DIR, "users.json")
@@ -48,7 +48,7 @@ def login_required(handler):
     return wrapped
 
 
-def register_auth_routes(app):
+def register_auth_routes(app, on_account_deleted=None):
     @app.post("/auth/register")
     def register():
         data = request.get_json(silent=True) or {}
@@ -109,3 +109,44 @@ def register_auth_routes(app):
         if not user:
             return jsonify({"user": None}), 401
         return jsonify({"user": _public_user(user)})
+
+    @app.post("/auth/change_password")
+    @login_required
+    def change_password(user):
+        data = request.get_json(silent=True) or {}
+        current_password = str(data.get("current_password", ""))
+        new_password = str(data.get("new_password", ""))
+
+        if not check_password_hash(user["password_hash"], current_password):
+            return jsonify({"error": "現在のパスワードが違います"}), 401
+        if len(new_password) < 6:
+            return jsonify({"error": "新しいパスワードは6文字以上にしてください"}), 400
+
+        with users_lock:
+            users = _load_users()
+            target = next((item for item in users if item["id"] == user["id"]), None)
+            if not target:
+                return jsonify({"error": "ユーザーが見つかりません"}), 404
+            target["password_hash"] = generate_password_hash(new_password)
+            _write_json_atomic(USERS_FILE, users)
+
+        return jsonify({"message": "パスワードを変更しました"})
+
+    @app.post("/auth/delete_account")
+    @login_required
+    def delete_account(user):
+        data = request.get_json(silent=True) or {}
+        password = str(data.get("password", ""))
+        if not check_password_hash(user["password_hash"], password):
+            return jsonify({"error": "パスワードが違います"}), 401
+
+        with users_lock:
+            users = _load_users()
+            remaining_users = [item for item in users if item["id"] != user["id"]]
+            _write_json_atomic(USERS_FILE, remaining_users)
+            delete_tasks(user["id"])
+
+        if on_account_deleted:
+            on_account_deleted(user["id"])
+        session.clear()
+        return jsonify({"message": "アカウントとタスクを削除しました"})

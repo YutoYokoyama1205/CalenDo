@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { login, register } from "../api/client.js";
+import { login, register, shutdownApp } from "../api/client.js";
 import "../styles/auth.css";
 
-export default function AuthScreen({ onAuthenticated }) {
+export default function AuthScreen({ onAuthenticated, onAppShutdown }) {
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -96,6 +96,20 @@ export default function AuthScreen({ onAuthenticated }) {
                 : "ログイン"}
           </button>
         </form>
+        <button
+          className="auth-quit"
+          type="button"
+          onClick={async () => {
+            try {
+              await shutdownApp();
+              onAppShutdown();
+            } catch (shutdownError) {
+              setError(shutdownError.message);
+            }
+          }}
+        >
+          CalenDoを終了
+        </button>
       </section>
     </main>
   );

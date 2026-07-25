@@ -10,6 +10,9 @@ async function request(path, options = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 && !path.startsWith("/auth/")) {
+      window.dispatchEvent(new CustomEvent("calendo:auth-expired"));
+    }
     throw new Error(data.error || `Request failed: ${res.status}`);
   }
   return data;
@@ -35,6 +38,43 @@ export function login(username, password) {
 
 export function logout() {
   return request("/auth/logout", { method: "POST" });
+}
+
+export function changePassword(currentPassword, newPassword) {
+  return request("/auth/change_password", {
+    method: "POST",
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+}
+
+export function deleteAccount(password) {
+  return request("/auth/delete_account", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function exportBackup() {
+  const response = await fetch("/data/export", { credentials: "include" });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "バックアップの作成に失敗しました");
+  }
+  return data;
+}
+
+export function importBackup(backup) {
+  return request("/data/import", {
+    method: "POST",
+    body: JSON.stringify(backup),
+  });
+}
+
+export function shutdownApp() {
+  return request("/app/shutdown", { method: "POST" });
 }
 
 // --- タスク取得 ---

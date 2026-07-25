@@ -9,6 +9,7 @@ export default function Header({
   onPickDate,
   user,
   onLogout,
+  onSettings,
 }) {
   return (
     <header className="header">
@@ -97,6 +98,9 @@ export default function Header({
           Today
         </button>
         <span className="header-user">{user.username}</span>
+        <button className="btn-logout" onClick={onSettings}>
+          設定
+        </button>
         <button className="btn-logout" onClick={onLogout}>
           ログアウト
         </button>

@@ -37,5 +37,8 @@ Thumbs.db
 # ===========================
 backend/build/
 backend/dist/
+/build/
+/dist/
 *.exe
 *.spec
+!packaging/*.spec

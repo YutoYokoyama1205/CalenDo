@@ -45,3 +45,21 @@
   color: var(--color-text-muted);
   background: var(--color-bg);
 }
+
+.app-stopped {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--color-ink);
+}
+
+.app-stopped h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.app-stopped p {
+  color: var(--color-ink-mute);
+}

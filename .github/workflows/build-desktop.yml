@@ -1,0 +1,60 @@
+name: Build desktop apps
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: CalenDo-mac
+            path: dist/CalenDo.app
+          - os: windows-latest
+            artifact: CalenDo-windows
+            path: dist/CalenDo.exe
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install Python dependencies
+        run: python -m pip install -r backend/requirements.txt
+
+      - name: Build desktop app
+        run: python -m PyInstaller --clean --noconfirm packaging/CalenDo.spec
+
+      - name: Zip macOS app
+        if: runner.os == 'macOS'
+        run: |
+          xattr -d com.apple.FinderInfo dist/CalenDo.app 2>/dev/null || true
+          codesign --force --deep --sign - dist/CalenDo.app
+          ditto -c -k --sequesterRsrc --keepParent dist/CalenDo.app dist/CalenDo-mac.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ runner.os == 'macOS' && 'dist/CalenDo-mac.zip' || matrix.path }}
+          if-no-files-found: error

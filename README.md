@@ -6,7 +6,9 @@ CalenDoは、1週間単位で予定とタスクを管理できるTo Doアプリ�
 ## 主な機能
 
 - ユーザー登録、ログイン、ログアウト
+- パスワード変更、アカウント削除
 - ユーザーごとに独立したタスクデータ
+- タスクデータのバックアップと復元
 - 1週間分のタスクを一覧表示
 - タスクの追加、編集、削除
 - タスクの完了チェック
@@ -113,8 +115,10 @@ python app.py
 起動後、ブラウザで次のURLを開きます。
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:5050
 ```
+
+`5050`番が使用中の場合は、空いているポートを自動的に選択します。
 
 ## 開発モード
 
@@ -131,7 +135,7 @@ npm run dev
 http://127.0.0.1:5173
 ```
 
-Viteは`/auth`やタスク関連APIを`http://127.0.0.1:5000`へ転送します。
+Viteは`/auth`やタスク関連APIをバックエンドへ転送します。開発時にViteを使う場合は、バックエンドを`CALENDO_PORT=5000`で起動してください。
 
 ## ユーザーデータ
 
@@ -165,6 +169,8 @@ export CALENDO_DATA_DIR="/任意の保存先"
 | `POST` | `/auth/login` | ログイン |
 | `POST` | `/auth/logout` | ログアウト |
 | `GET` | `/auth/me` | ログイン中のユーザーを取得 |
+| `POST` | `/auth/change_password` | パスワード変更 |
+| `POST` | `/auth/delete_account` | アカウント削除 |
 
 登録・ログインのリクエスト例：
 
@@ -190,6 +196,36 @@ export CALENDO_DATA_DIR="/任意の保存先"
 | `POST` | `/check_box` | 完了状態を切り替え |
 | `GET` | `/achievement_rate?date=YYYY-MM-DD` | 指定日の達成率を取得 |
 | `POST` | `/week_tasks` | 1週間分のタスクを取得 |
+| `GET` | `/data/export` | バックアップを書き出す |
+| `POST` | `/data/import` | バックアップを復元 |
+
+## Mac・Windows版のビルド
+
+Mac：
+
+```bash
+./scripts/build-mac.sh
+```
+
+生成物：
+
+```text
+dist/CalenDo.app
+```
+
+Windows PowerShell：
+
+```powershell
+.\scripts\build-windows.ps1
+```
+
+生成物：
+
+```text
+dist\CalenDo.exe
+```
+
+`.app`はMac上、`.exe`はWindows上でビルドしてください。GitHub Actionsの「Build desktop apps」を手動実行すると、両OS版を自動ビルドできます。
 
 ## 現在の利用範囲
 
