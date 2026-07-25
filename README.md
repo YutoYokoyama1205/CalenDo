@@ -1,207 +1,210 @@
-# CalenDo Backend
+# CalenDo
 
-1週間表示型 To Do アプリ「CalenDo」のバックエンドです。
+CalenDoは、1週間単位で予定とタスクを管理できるTo Doアプリです。
+日ごとのタスク登録・編集・完了管理に加えて、1週間の達成率をグラフで確認できます。
+
+## 主な機能
+
+- ユーザー登録、ログイン、ログアウト
+- ユーザーごとに独立したタスクデータ
+- 1週間分のタスクを一覧表示
+- タスクの追加、編集、削除
+- タスクの完了チェック
+- 日別・週全体の達成率表示
+- 前週・翌週・指定日への移動
 
 ## 使用技術
 
+### フロントエンド
+
+- React 18
+- Vite
+- Recharts
+
+### バックエンド
+
 - Python
 - Flask
-- JSON
-- React（フロントエンド）
+- Flask-CORS
+- JSONファイルによるローカルデータ保存
+- Flaskセッションによるログイン管理
+- Werkzeugによるパスワードのハッシュ化
 
----
+## ディレクトリ構成
 
-# 起動方法
-
-## 1. ライブラリインストール
-
-```bash
-pip install -r requirements.txt
+```text
+CalenDo/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── client.js
+│   │   ├── components/
+│   │   │   ├── AuthScreen.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── WeekGrid.jsx
+│   │   │   └── ...
+│   │   ├── styles/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+├── backend/
+│   ├── app.py
+│   ├── api.py
+│   ├── auth.py
+│   ├── storage.py
+│   ├── tasks.py
+│   └── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
----
+## ローカル環境での起動
 
-## 2. サーバー起動
+### 必要なもの
+
+- Python 3
+- Node.js
+- npm
+
+### 1. リポジトリを取得
 
 ```bash
+git clone https://github.com/YutoYokoyama1205/CalenDo.git
+cd CalenDo
+```
+
+### 2. フロントエンドをビルド
+
+```bash
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+ビルド結果は`frontend/dist/`へ出力されます。
+
+### 3. Pythonライブラリをインストール
+
+```bash
+cd backend
+python3 -m pip install -r requirements.txt
+```
+
+### 4. アプリを起動
+
+macOS・Linux：
+
+```bash
+export CALENDO_SECRET_KEY="任意の十分長い文字列"
+python3 app.py
+```
+
+Windows PowerShell：
+
+```powershell
+$env:CALENDO_SECRET_KEY="任意の十分長い文字列"
 python app.py
 ```
 
-起動後：
+起動後、ブラウザで次のURLを開きます。
 
 ```text
 http://127.0.0.1:5000
 ```
 
-でアクセスできます。
+## 開発モード
 
----
+バックエンドを起動した状態で、別のターミナルからViteを起動します。
 
-# API一覧
+```bash
+cd frontend
+npm run dev
+```
 
-## タスク一覧取得
-
-### GET
+開発画面：
 
 ```text
-/tasks?date=2026-05-18
+http://127.0.0.1:5173
 ```
 
-### レスポンス例
+Viteは`/auth`やタスク関連APIを`http://127.0.0.1:5000`へ転送します。
 
-```json
-[
-    {
-        "task_id": 1,
-        "task_name": "数学",
-        "start_time": "10:00",
-        "end_time": "11:00",
-        "completed": false
-    }
-]
-```
+## ユーザーデータ
 
----
-
-# タスク追加
-
-## POST
+ユーザー情報とタスクは、ソースコードの外にある`.calendo`フォルダへ保存されます。
 
 ```text
-/add_task
+~/.calendo/
+├── users.json
+└── users/
+    ├── <ユーザーID>.json
+    └── <ユーザーID>.json
 ```
 
-## リクエスト例
+- `users.json`：ユーザーID、ユーザー名、ハッシュ化されたパスワード
+- `users/<ユーザーID>.json`：各ユーザーのタスク
+- パスワードそのものは保存されません
 
-```json
-{
-    "date": "2026-05-18",
-    "task_name": "英語",
-    "start_time": "13:00",
-    "end_time": "14:00"
-}
+保存場所を変更する場合は、起動前に`CALENDO_DATA_DIR`を設定してください。
+
+```bash
+export CALENDO_DATA_DIR="/任意の保存先"
 ```
 
----
+## API
 
-# タスク削除
+### 認証
 
-## POST
+| Method | Endpoint | 説明 |
+| --- | --- | --- |
+| `POST` | `/auth/register` | ユーザー登録 |
+| `POST` | `/auth/login` | ログイン |
+| `POST` | `/auth/logout` | ログアウト |
+| `GET` | `/auth/me` | ログイン中のユーザーを取得 |
 
-```text
-/delete_task
-```
-
-## リクエスト例
+登録・ログインのリクエスト例：
 
 ```json
 {
-    "date": "2026-05-18",
-    "task_id": 1
+  "username": "calendo-user",
+  "password": "password123"
 }
 ```
 
----
+ユーザー名は2〜30文字、パスワードは6文字以上です。
 
-# タスク編集
+### タスク
 
-## POST
+以下のAPIはログインが必要です。
 
-```text
-/edit_task
-```
+| Method | Endpoint | 説明 |
+| --- | --- | --- |
+| `GET` | `/tasks?date=YYYY-MM-DD` | 指定日のタスクを取得 |
+| `POST` | `/add_task` | タスクを追加 |
+| `POST` | `/edit_task` | タスクを編集 |
+| `POST` | `/delete_task` | タスクを削除 |
+| `POST` | `/check_box` | 完了状態を切り替え |
+| `GET` | `/achievement_rate?date=YYYY-MM-DD` | 指定日の達成率を取得 |
+| `POST` | `/week_tasks` | 1週間分のタスクを取得 |
 
-## リクエスト例
+## 現在の利用範囲
 
-```json
-{
-    "date": "2026-05-18",
-    "task_id": 1,
-    "task_name": "数学演習",
-    "start_time": "09:00",
-    "end_time": "10:00"
-}
-```
+現在はローカル環境での利用を想定しています。友人など複数人が別々の端末からアクセスするには、Flaskバックエンドとフロントエンドをサーバーへ配置し、HTTPS、公開用データベース、環境変数管理などを追加する必要があります。
 
----
+## 共同開発
 
-# チェックボックス更新
+1. `main`から作業用ブランチを作成
+2. 変更をコミット
+3. 自分のブランチをGitHubへプッシュ
+4. `main`向けのプルリクエストを作成
+5. レビュー後にマージ
 
-## POST
-
-```text
-/check_box
-```
-
-## リクエスト例
-
-```json
-{
-    "date": "2026-05-18",
-    "task_id": 1
-}
-```
-
----
-
-# 達成率取得
-
-## GET
-
-```text
-/achievement_rate?date=2026-05-18
-```
-
----
-
-# 週データ取得
-
-## POST
-
-```text
-/week_tasks
-```
-
-## リクエスト例
-
-```json
-{
-    "dates": [
-        "2026-05-18",
-        "2026-05-19",
-        "2026-05-20",
-        "2026-05-21",
-        "2026-05-22",
-        "2026-05-23",
-        "2026-05-24"
-    ]
-}
-```
-
----
-
-# データ保存
-
-タスクデータは：
-
-```text
-tasks.json
-```
-
-へ自動保存されます。
-
----
-
-# ディレクトリ構成
-
-```text
-backend/
-
-├── app.py
-├── api.py
-├── tasks.py
-├── storage.py
-├── tasks.json
-├── requirements.txt
-└── README.md
+```bash
+git switch main
+git pull
+git switch -c feature/変更内容
 ```
