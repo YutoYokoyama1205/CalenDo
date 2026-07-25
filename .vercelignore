@@ -1,0 +1,9 @@
+/build
+/dist
+/backend/build
+/backend/dist
+/frontend/node_modules
+/packaging
+/scripts
+**/__pycache__
+*.spec

@@ -1,6 +1,4 @@
 flask
 flask-cors
-pyinstaller
-waitress
 sqlalchemy
 psycopg[binary]

@@ -4,6 +4,12 @@ import secrets
 import tempfile
 
 from tasks import Task, Daily_Task
+from database import (
+    database_enabled,
+    delete_user,
+    load_user_tasks,
+    replace_user_tasks,
+)
 
 
 APP_DIR = os.environ.get(
@@ -47,6 +53,11 @@ def get_or_create_secret_key():
     if configured_secret:
         return configured_secret
 
+    if database_enabled or os.environ.get("VERCEL"):
+        raise RuntimeError(
+            "公開環境ではCALENDO_SECRET_KEY環境変数を設定してください"
+        )
+
     os.makedirs(APP_DIR, exist_ok=True)
     if os.path.exists(SECRET_FILE):
         with open(SECRET_FILE, "r", encoding="utf-8") as file:
@@ -74,6 +85,20 @@ def get_or_create_secret_key():
 
 
 def save_tasks(calendar_manager, user_id):
+    if database_enabled:
+        rows = []
+        for date, daily_task in calendar_manager.daily_tasks.items():
+            for task in daily_task.tasks:
+                rows.append(
+                    {
+                        "user_id": user_id,
+                        "date": date,
+                        **task.to_dict(),
+                    }
+                )
+        replace_user_tasks(user_id, rows)
+        return
+
     _ensure_storage()
     data = {}
 
@@ -84,6 +109,23 @@ def save_tasks(calendar_manager, user_id):
 
 
 def load_tasks(calendar_manager, user_id):
+    if database_enabled:
+        for task_data in load_user_tasks(user_id):
+            date = task_data["date"]
+            daily_task = calendar_manager.get_daily_task(date)
+            daily_task.tasks.append(
+                Task(
+                    task_data["task_id"],
+                    task_data["task_name"],
+                    task_data["start_time"],
+                    task_data["end_time"],
+                    task_data["completed"],
+                )
+            )
+        for daily_task in calendar_manager.daily_tasks.values():
+            daily_task.sort_tasks()
+        return
+
     _ensure_storage()
     file_name = _task_file(user_id)
 
@@ -167,6 +209,10 @@ def import_tasks(calendar_manager, backup):
 
 
 def delete_tasks(user_id):
+    if database_enabled:
+        delete_user(user_id)
+        return
+
     file_name = _task_file(user_id)
     if os.path.exists(file_name):
         os.unlink(file_name)

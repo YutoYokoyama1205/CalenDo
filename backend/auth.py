@@ -8,6 +8,13 @@ from flask import jsonify, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from storage import APP_DIR, _write_json_atomic, delete_tasks
+from database import (
+    create_user as create_database_user,
+    database_enabled,
+    delete_user as delete_database_user,
+    list_users as list_database_users,
+    update_password as update_database_password,
+)
 
 
 USERS_FILE = os.path.join(APP_DIR, "users.json")
@@ -15,6 +22,9 @@ users_lock = threading.Lock()
 
 
 def _load_users():
+    if database_enabled:
+        return list_database_users()
+
     if not os.path.exists(USERS_FILE):
         return []
 
@@ -70,8 +80,11 @@ def register_auth_routes(app, on_account_deleted=None):
                 "username": username,
                 "password_hash": generate_password_hash(password),
             }
-            users.append(user)
-            _write_json_atomic(USERS_FILE, users)
+            if database_enabled:
+                create_database_user(user)
+            else:
+                users.append(user)
+                _write_json_atomic(USERS_FILE, users)
 
         session.clear()
         session["user_id"] = user["id"]
@@ -123,12 +136,18 @@ def register_auth_routes(app, on_account_deleted=None):
             return jsonify({"error": "新しいパスワードは6文字以上にしてください"}), 400
 
         with users_lock:
-            users = _load_users()
-            target = next((item for item in users if item["id"] == user["id"]), None)
-            if not target:
-                return jsonify({"error": "ユーザーが見つかりません"}), 404
-            target["password_hash"] = generate_password_hash(new_password)
-            _write_json_atomic(USERS_FILE, users)
+            new_password_hash = generate_password_hash(new_password)
+            if database_enabled:
+                update_database_password(user["id"], new_password_hash)
+            else:
+                users = _load_users()
+                target = next(
+                    (item for item in users if item["id"] == user["id"]), None
+                )
+                if not target:
+                    return jsonify({"error": "ユーザーが見つかりません"}), 404
+                target["password_hash"] = new_password_hash
+                _write_json_atomic(USERS_FILE, users)
 
         return jsonify({"message": "パスワードを変更しました"})
 
@@ -141,10 +160,15 @@ def register_auth_routes(app, on_account_deleted=None):
             return jsonify({"error": "パスワードが違います"}), 401
 
         with users_lock:
-            users = _load_users()
-            remaining_users = [item for item in users if item["id"] != user["id"]]
-            _write_json_atomic(USERS_FILE, remaining_users)
-            delete_tasks(user["id"])
+            if database_enabled:
+                delete_database_user(user["id"])
+            else:
+                users = _load_users()
+                remaining_users = [
+                    item for item in users if item["id"] != user["id"]
+                ]
+                _write_json_atomic(USERS_FILE, remaining_users)
+                delete_tasks(user["id"])
 
         if on_account_deleted:
             on_account_deleted(user["id"])
