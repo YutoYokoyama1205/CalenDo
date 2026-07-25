@@ -14,6 +14,7 @@ from storage import (
     save_tasks,
 )
 from tasks import CalendarManager
+from database import database_enabled
 
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ app.config.update(
     SECRET_KEY=get_or_create_secret_key(),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=bool(os.environ.get("VERCEL")),
 )
 calendar_managers = {}
 manager_lock = threading.RLock()
@@ -39,7 +41,22 @@ CORS(
 register_auth_routes(app, on_account_deleted=remove_calendar_manager)
 
 
+@app.get("/health")
+def health():
+    return jsonify(
+        {
+            "status": "ok",
+            "storage": "postgresql" if database_enabled else "local-json",
+        }
+    )
+
+
 def get_calendar_manager(user_id):
+    if database_enabled:
+        manager = CalendarManager()
+        load_tasks(manager, user_id)
+        return manager
+
     with manager_lock:
         if user_id not in calendar_managers:
             manager = CalendarManager()

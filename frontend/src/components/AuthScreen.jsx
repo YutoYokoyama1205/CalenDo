@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { login, register, shutdownApp } from "../api/client.js";
+import { IS_HOSTED, login, register, shutdownApp } from "../api/client.js";
 import "../styles/auth.css";
 
 export default function AuthScreen({ onAuthenticated, onAppShutdown }) {
@@ -96,20 +96,22 @@ export default function AuthScreen({ onAuthenticated, onAppShutdown }) {
                 : "ログイン"}
           </button>
         </form>
-        <button
-          className="auth-quit"
-          type="button"
-          onClick={async () => {
-            try {
-              await shutdownApp();
-              onAppShutdown();
-            } catch (shutdownError) {
-              setError(shutdownError.message);
-            }
-          }}
-        >
-          CalenDoを終了
-        </button>
+        {!IS_HOSTED && (
+          <button
+            className="auth-quit"
+            type="button"
+            onClick={async () => {
+              try {
+                await shutdownApp();
+                onAppShutdown();
+              } catch (shutdownError) {
+                setError(shutdownError.message);
+              }
+            }}
+          >
+            CalenDoを終了
+          </button>
+        )}
       </section>
     </main>
   );

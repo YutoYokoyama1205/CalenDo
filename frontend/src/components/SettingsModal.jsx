@@ -5,6 +5,7 @@ import {
   exportBackup,
   importBackup,
   shutdownApp,
+  IS_HOSTED,
 } from "../api/client.js";
 import "../styles/settings.css";
 
@@ -201,9 +202,11 @@ export default function SettingsModal({
         </div>
 
         <footer className="settings-footer">
-          <button className="settings-quit" onClick={handleShutdown} disabled={busy}>
-            CalenDoを終了
-          </button>
+          {!IS_HOSTED && (
+            <button className="settings-quit" onClick={handleShutdown} disabled={busy}>
+              CalenDoを終了
+            </button>
+          )}
           <button className="btn btn-primary" onClick={onClose} disabled={busy}>
             閉じる
           </button>

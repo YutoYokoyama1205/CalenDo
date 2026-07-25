@@ -227,6 +227,67 @@ dist\CalenDo.exe
 
 `.app`はMac上、`.exe`はWindows上でビルドしてください。GitHub Actionsの「Build desktop apps」を手動実行すると、両OS版を自動ビルドできます。
 
+## Vercelへ公開
+
+Vercel版では、Reactを静的ファイルとして配信し、Flask APIをVercel Functionsで実行します。ユーザーとタスクはPostgreSQLへ保存されます。
+
+### 1. PostgreSQLを用意
+
+Vercel MarketplaceからNeonまたはSupabaseなどのPostgreSQLをプロジェクトへ接続します。接続後、`DATABASE_URL`がVercelの環境変数へ設定されていることを確認してください。
+
+### 2. セッション秘密鍵を設定
+
+ローカルで秘密鍵を生成します。
+
+```bash
+openssl rand -hex 32
+```
+
+生成された値を、Vercelプロジェクトの環境変数へ登録します。
+
+```text
+CALENDO_SECRET_KEY=<生成した値>
+```
+
+`DATABASE_URL`と`CALENDO_SECRET_KEY`は、PreviewとProductionで必要です。値をソースコードやGitHubへコミットしないでください。
+
+### 3. デプロイ
+
+VercelでGitHubリポジトリをインポートし、プロジェクトルートをリポジトリのルートに設定します。`vercel.json`に以下が設定済みです。
+
+- Reactのビルド
+- `frontend/dist`の静的配信
+- `/api/*`からFlask Functionへの転送
+- Python Functionへのバックエンドファイル同梱
+
+デプロイ後、次のURLで動作を確認できます。
+
+```text
+https://<プロジェクト名>.vercel.app
+https://<プロジェクト名>.vercel.app/api/health
+```
+
+ヘルスチェックが正常な場合、次のように返ります。
+
+```json
+{
+  "status": "ok",
+  "storage": "postgresql"
+}
+```
+
+### 保存方式の自動切替
+
+```text
+ローカル・デスクトップ版
+└── ~/.calendo のJSONファイル
+
+Vercel版（DATABASE_URLあり）
+└── PostgreSQL
+```
+
+Vercel版ではHTTPS Cookieを使用し、デスクトップ専用の終了ボタンは表示されません。
+
 ## 現在の利用範囲
 
 現在はローカル環境での利用を想定しています。友人など複数人が別々の端末からアクセスするには、Flaskバックエンドとフロントエンドをサーバーへ配置し、HTTPS、公開用データベース、環境変数管理などを追加する必要があります。

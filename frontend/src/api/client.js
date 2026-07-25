@@ -1,6 +1,7 @@
 // FlaskバックエンドAPIクライアント
 // 開発時はViteプロキシ経由で http://127.0.0.1:5000 へ
-const BASE_URL = "";
+export const IS_HOSTED = window.location.protocol === "https:";
+const BASE_URL = IS_HOSTED ? "/api" : "";
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -58,7 +59,9 @@ export function deleteAccount(password) {
 }
 
 export async function exportBackup() {
-  const response = await fetch("/data/export", { credentials: "include" });
+  const response = await fetch(`${BASE_URL}/data/export`, {
+    credentials: "include",
+  });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.error || "バックアップの作成に失敗しました");
