@@ -5,6 +5,7 @@ const BASE_URL = "";
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     ...options,
   });
   const data = await res.json().catch(() => ({}));
@@ -12,6 +13,28 @@ async function request(path, options = {}) {
     throw new Error(data.error || `Request failed: ${res.status}`);
   }
   return data;
+}
+
+export function getCurrentUser() {
+  return request("/auth/me");
+}
+
+export function register(username, password) {
+  return request("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export function login(username, password) {
+  return request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export function logout() {
+  return request("/auth/logout", { method: "POST" });
 }
 
 // --- タスク取得 ---

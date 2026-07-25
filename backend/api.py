@@ -1,171 +1,121 @@
-from flask import Flask, request, jsonify
+import os
+import secrets
+import threading
+
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from auth import login_required, register_auth_routes
+from storage import load_tasks, save_tasks
 from tasks import CalendarManager
-from storage import save_tasks, load_tasks
 
 
 app = Flask(__name__)
+app.config.update(
+    SECRET_KEY=os.environ.get("CALENDO_SECRET_KEY", secrets.token_hex(32)),
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
+CORS(app, supports_credentials=True)
+register_auth_routes(app)
 
-# React接続用
-CORS(app)
-
-calendar_manager = CalendarManager()
-
-# 起動時読み込み
-load_tasks(calendar_manager)
+calendar_managers = {}
+manager_lock = threading.Lock()
 
 
-# タスク一覧取得
-@app.route("/tasks", methods=["GET"])
-def get_tasks():
+def get_calendar_manager(user_id):
+    with manager_lock:
+        if user_id not in calendar_managers:
+            manager = CalendarManager()
+            load_tasks(manager, user_id)
+            calendar_managers[user_id] = manager
+        return calendar_managers[user_id]
 
+
+@app.get("/tasks")
+@login_required
+def get_tasks(user):
     date = request.args.get("date")
-
-    daily_task = calendar_manager.get_daily_task(date)
-
-    return jsonify(
-        daily_task.get_tasks_data()
-    )
+    daily_task = get_calendar_manager(user["id"]).get_daily_task(date)
+    return jsonify(daily_task.get_tasks_data())
 
 
-# タスク追加
-@app.route("/add_task", methods=["POST"])
-def add_task():
-
+@app.post("/add_task")
+@login_required
+def add_task(user):
     try:
-
-        data = request.json
-
-        date = data["date"]
-
-        daily_task = calendar_manager.get_daily_task(date)
-
+        data = request.get_json() or {}
+        manager = get_calendar_manager(user["id"])
+        daily_task = manager.get_daily_task(data["date"])
         daily_task.add_task(
             data["task_name"],
             data["start_time"],
-            data["end_time"]
+            data["end_time"],
         )
-
-        save_tasks(calendar_manager)
-
-        return jsonify({
-            "message": "Task added"
-        })
-
-    except Exception as error:
-
-        return jsonify({
-            "error": str(error)
-        }), 400
+        save_tasks(manager, user["id"])
+        return jsonify({"message": "Task added"})
+    except (KeyError, TypeError, ValueError) as error:
+        return jsonify({"error": str(error)}), 400
 
 
-# タスク削除
-@app.route("/delete_task", methods=["POST"])
-def delete_task():
-
-    data = request.json
-
-    date = data["date"]
-
-    daily_task = calendar_manager.get_daily_task(date)
-
-    daily_task.delete_task(
-        data["task_id"]
-    )
-
-    save_tasks(calendar_manager)
-
-    return jsonify({
-        "message": "Task deleted"
-    })
+@app.post("/delete_task")
+@login_required
+def delete_task(user):
+    data = request.get_json() or {}
+    manager = get_calendar_manager(user["id"])
+    manager.get_daily_task(data["date"]).delete_task(data["task_id"])
+    save_tasks(manager, user["id"])
+    return jsonify({"message": "Task deleted"})
 
 
-# タスク編集
-@app.route("/edit_task", methods=["POST"])
-def edit_task():
-
+@app.post("/edit_task")
+@login_required
+def edit_task(user):
     try:
-
-        data = request.json
-
-        date = data["date"]
-
-        daily_task = calendar_manager.get_daily_task(date)
-
-        daily_task.edit_task(
+        data = request.get_json() or {}
+        manager = get_calendar_manager(user["id"])
+        manager.get_daily_task(data["date"]).edit_task(
             data["task_id"],
             data["task_name"],
             data["start_time"],
-            data["end_time"]
+            data["end_time"],
         )
-
-        save_tasks(calendar_manager)
-
-        return jsonify({
-            "message": "Task edited"
-        })
-
-    except Exception as error:
-
-        return jsonify({
-            "error": str(error)
-        }), 400
+        save_tasks(manager, user["id"])
+        return jsonify({"message": "Task edited"})
+    except (KeyError, TypeError, ValueError) as error:
+        return jsonify({"error": str(error)}), 400
 
 
-# チェックボックス更新
-@app.route("/check_box", methods=["POST"])
-def check_box():
+@app.post("/check_box")
+@login_required
+def check_box(user):
+    data = request.get_json() or {}
+    manager = get_calendar_manager(user["id"])
+    manager.get_daily_task(data["date"]).check_box(data["task_id"])
+    save_tasks(manager, user["id"])
+    return jsonify({"message": "Checkbox updated"})
 
-    data = request.json
 
-    date = data["date"]
-
-    daily_task = calendar_manager.get_daily_task(date)
-
-    daily_task.check_box(
-        data["task_id"]
+@app.get("/achievement_rate")
+@login_required
+def achievement_rate(user):
+    daily_task = get_calendar_manager(user["id"]).get_daily_task(
+        request.args.get("date")
+    )
+    return jsonify(
+        {
+            "achievement_rate": daily_task.achievement_rate(),
+            "completed_task": daily_task.completed_count(),
+            "uncompleted_task": daily_task.uncompleted_count(),
+            "total_task": daily_task.count_task(),
+        }
     )
 
-    save_tasks(calendar_manager)
 
-    return jsonify({
-        "message": "Checkbox updated"
-    })
-
-
-# 達成率取得
-@app.route("/achievement_rate", methods=["GET"])
-def achievement_rate():
-
-    date = request.args.get("date")
-
-    daily_task = calendar_manager.get_daily_task(date)
-
-    return jsonify({
-
-        "achievement_rate":
-            daily_task.achievement_rate(),
-
-        "completed_task":
-            daily_task.completed_count(),
-
-        "uncompleted_task":
-            daily_task.uncompleted_count(),
-
-        "total_task":
-            daily_task.count_task()
-    })
-
-
-# 週データ取得
-@app.route("/week_tasks", methods=["POST"])
-def week_tasks():
-
-    data = request.json
-
-    dates = data["dates"]
-
+@app.post("/week_tasks")
+@login_required
+def week_tasks(user):
+    data = request.get_json() or {}
     return jsonify(
-        calendar_manager.get_week_tasks(dates)
+        get_calendar_manager(user["id"]).get_week_tasks(data.get("dates", []))
     )

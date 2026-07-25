@@ -119,7 +119,7 @@ export default function AchievementPanel({ weekDates, weekData }) {
       <div className="ach-summary">
         <span className="ach-eyebrow">weekly recap</span>
         <h2 className="ach-title">
-          達成の<em>うねり</em>
+          達成率
         </h2>
         <p className="ach-lead">
           7日間の達成率を折れ線で確認できます。継続のリズムを掴みましょう。
@@ -146,7 +146,7 @@ export default function AchievementPanel({ weekDates, weekData }) {
             <dt>取り組み日数</dt>
             <dd>
               <span className="ach-stat-val">{weekSummary.activeDays}</span>
-              <span className="ach-stat-unit">days</span>
+              <span className="ach-stat-unit">days / 7days</span>
             </dd>
           </div>
         </dl>

@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      "/auth": "http://127.0.0.1:5000",
       "/tasks": "http://127.0.0.1:5000",
       "/add_task": "http://127.0.0.1:5000",
       "/delete_task": "http://127.0.0.1:5000",

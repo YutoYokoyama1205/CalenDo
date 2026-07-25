@@ -1,7 +1,15 @@
 import { getWeekRangeLabel, getMonthLabel } from "../utils/date.js";
 import "../styles/header.css";
 
-export default function Header({ monday, onPrev, onNext, onToday, onPickDate }) {
+export default function Header({
+  monday,
+  onPrev,
+  onNext,
+  onToday,
+  onPickDate,
+  user,
+  onLogout,
+}) {
   return (
     <header className="header">
       <div className="header-brand">
@@ -87,6 +95,10 @@ export default function Header({ monday, onPrev, onNext, onToday, onPickDate }) 
       <div className="header-actions">
         <button className="btn-today" onClick={onToday}>
           Today
+        </button>
+        <span className="header-user">{user.username}</span>
+        <button className="btn-logout" onClick={onLogout}>
+          ログアウト
         </button>
       </div>
     </header>

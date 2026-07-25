@@ -4,6 +4,7 @@ import WeekGrid from "./components/WeekGrid.jsx";
 import AchievementPanel from "./components/AchievementPanel.jsx";
 import TaskModal from "./components/TaskModal.jsx";
 import DatePickerModal from "./components/DatePickerModal.jsx";
+import AuthScreen from "./components/AuthScreen.jsx";
 import {
   formatDateKey,
   getMondayOf,
@@ -16,10 +17,14 @@ import {
   editTask,
   deleteTask,
   toggleCheck,
+  getCurrentUser,
+  logout,
 } from "./api/client.js";
 import "./styles/app.css";
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   // --- 状態管理 ---
   const [monday, setMonday] = useState(() => getMondayOf(new Date()));
   const [weekData, setWeekData] = useState({}); // { "YYYY-MM-DD": { tasks, achievement_rate, ... } }
@@ -32,6 +37,13 @@ export default function App() {
 
   const weekDates = getWeekDates(monday);
   const weekKeys = weekDates.map(formatDateKey);
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((result) => setUser(result.user))
+      .catch(() => setUser(null))
+      .finally(() => setAuthLoading(false));
+  }, []);
 
   // --- 週データロード ---
   const loadWeek = useCallback(async () => {
@@ -48,9 +60,16 @@ export default function App() {
   }, [monday]);
 
   useEffect(() => {
+    if (!user) return;
     setLoading(true);
     loadWeek();
-  }, [loadWeek]);
+  }, [loadWeek, user]);
+
+  async function handleLogout() {
+    await logout();
+    setUser(null);
+    setWeekData({});
+  }
 
   // --- 週切替 ---
   const goPrevWeek = () => setMonday((m) => shiftWeek(m, -1));
@@ -106,6 +125,14 @@ export default function App() {
     }
   };
 
+  if (authLoading) {
+    return <div className="app-loading">CalenDoを読み込んでいます...</div>;
+  }
+
+  if (!user) {
+    return <AuthScreen onAuthenticated={setUser} />;
+  }
+
   return (
     <div className="app">
       <Header
@@ -114,6 +141,8 @@ export default function App() {
         onNext={goNextWeek}
         onToday={goToday}
         onPickDate={() => setDatePickerOpen(true)}
+        user={user}
+        onLogout={handleLogout}
       />
 
       <main className="app-main">
